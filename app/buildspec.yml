@@ -14,13 +14,13 @@ phases:
   build:
     commands:
       - echo Building the Docker image...
-      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG -f app/Dockerfile .   # <---- Update this if needed
       - docker tag $ECR_REPOSITORY:$IMAGE_TAG 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
   post_build:
     commands:
       - echo Pushing Docker image to Amazon ECR...
       - docker push 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
       - echo Writing image definitions file...
-      - printf '[{"name":"flask-app","imageUri":"%s"}]' 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
+      - printf '[{"name":"simple-docker-service","imageUri":"%s"}]' 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
 artifacts:
   files: imagedefinitions.json
