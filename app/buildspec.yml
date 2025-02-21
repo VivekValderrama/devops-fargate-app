@@ -1,0 +1,26 @@
+version: 0.2
+
+env:
+  variables:
+    IMAGE_TAG: "latest"
+    AWS_REGION: "us-east-1"
+    ECR_REPOSITORY: "simple-docker-service-0e69ed00086f"
+
+phases:
+  pre_build:
+    commands:
+      - echo Logging in to Amazon ECR...
+      - aws ecr get-login-password --region $AWS_REGION | docker login --username AWS --password-stdin 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com
+  build:
+    commands:
+      - echo Building the Docker image...
+      - docker build -t $ECR_REPOSITORY:$IMAGE_TAG .
+      - docker tag $ECR_REPOSITORY:$IMAGE_TAG 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+  post_build:
+    commands:
+      - echo Pushing Docker image to Amazon ECR...
+      - docker push 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG
+      - echo Writing image definitions file...
+      - printf '[{"name":"flask-app","imageUri":"%s"}]' 886436950565.dkr.ecr.$AWS_REGION.amazonaws.com/$ECR_REPOSITORY:$IMAGE_TAG > imagedefinitions.json
+artifacts:
+  files: imagedefinitions.json
